@@ -3,6 +3,11 @@
 ## TODO
   * handle when a Step errors or decides to skip itself, or is skipped from upstream error/skip
 
+## QUESTIONS
+  * might there still be value in storing the result on the `StepConnection`?
+    * this could be part of `StepContext` pass to `Step.run()`
+    * wonder if could help parallelism, as the results wouldn't be bound to something that might exist in multiple threads/processes/containers 
+
 ## Misc
   * Steps are instantiated before registering in Runner DAG
     * allows a simple Step type to be reused without sharing the instance

@@ -117,6 +117,14 @@ class Runner:
         else:
             raise Exception(f"Unknown results format: {results_format}")
 
+    def prepare_step_context(self, step, caller):
+        return StepContext(
+            step=step,
+            feeders=list(self.get_feeders(step)),
+            caller=caller,
+            caller_args=self.dag.edges[(step, caller)],
+        )
+
     def run(self, results_format="dict"):
         """
         NOTES
@@ -130,14 +138,7 @@ class Runner:
 
         for step in self.topographic_step_sort():
             for caller in self.get_callers(step):
-                # TODO: move into dedicated method
-                context = StepContext(
-                    step=step,
-                    feeders=list(self.get_feeders(step)),
-                    caller=caller,
-                    caller_args=self.dag.edges[(step, caller)],
-                )
-
+                context = self.prepare_step_context(step, caller)
                 logger.info(f"running Step: {step} with context: {context}")
                 result = step.run(context)
                 step.caller_result[caller] = result

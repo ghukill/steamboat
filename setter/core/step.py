@@ -91,4 +91,3 @@ class StepConnection:
     step: Step
     next_step: Step
     args: dict = attrib(factory=dict)
-    result: StepResult = attrib(factory=NoneResult)

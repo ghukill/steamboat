@@ -20,13 +20,13 @@ def test_runner_combine_and_split():
                 return NoneResult()
 
     class NumberPrinter(Step):
-        def run(self, context) -> NoneResult:
+        def run(self, context) -> NoneResult | NoneResult:
             res = context.results
             if isinstance(res, NumericResult):
                 print(f"We got a number! {res.data}")
             else:
                 print("Nothing for us...")
-            return NoneResult()
+            return res
 
     a = Generate42(name="A")
     b = Generate42(name="B")
@@ -44,3 +44,7 @@ def test_runner_combine_and_split():
     runner.add_connection(StepConnection(x, e, {"checker": lambda x: x >= 100}))
 
     results = runner.run()
+
+    assert isinstance(results[d], NumericResult)
+    assert isinstance(results[e], NoneResult)
+    assert len(runner.get_results(results_format="list")) == 2
