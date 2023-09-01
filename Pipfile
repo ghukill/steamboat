@@ -1,0 +1,26 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+duckdb = "*"
+attrs = "*"
+mypy = "*"
+pandas = "*"
+numpy = "*"
+pandas-stubs = "*"
+networkx = "*"
+grandalf = "*"
+networkx-stubs = "*"
+
+[dev-packages]
+black = "*"
+ipython = "*"
+ruff = "*"
+pytest = "*"
+coveralls = "*"
+
+[requires]
+python_version = "3.11"
+python_full_version = "3.11.4"
