@@ -126,14 +126,10 @@ class Runner:
         )
 
     def run(self, results_format="dict"):
-        """
-        NOTES
-            - invoke ONCE per multiple feeders (all steps combine)
-            - invoke PER caller (all splits get their own run, but can cache results)
-                - consider a warning if no caching?  or decorator that does that?
-        """
+        """ """
 
         self.finalize_dag()
+
         self.log_as_ascii()
 
         for step in self.topographic_step_sort():

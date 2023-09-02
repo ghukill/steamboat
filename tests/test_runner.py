@@ -1,7 +1,13 @@
+import logging
+
 from setter.core.step import Step, StepConnection
 from setter.core.result import NoneResult, NumericResult
 from setter.core.runner import Runner
 
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 def test_runner_combine_and_split():
     class Generate42(Step):
@@ -23,9 +29,9 @@ def test_runner_combine_and_split():
         def run(self, context) -> NoneResult | NoneResult:
             res = context.results
             if isinstance(res, NumericResult):
-                print(f"We got a number! {res.data}")
+                logging.info(f"We got a number! {res.data}")
             else:
-                print("Nothing for us...")
+                logging.info("Nothing for us...")
             return res
 
     a = Generate42(name="A")
