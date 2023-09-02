@@ -162,7 +162,6 @@ class Runner:
                 context = self.prepare_step_context(step, caller)
                 logger.info(f"running Step: {step} with context: {context}")
                 result = step.run(context)
-                # step.caller_result[caller] = result
                 context.caller_connection.result = result
 
         return self.get_results(results_format)
