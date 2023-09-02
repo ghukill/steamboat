@@ -10,7 +10,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def test_runner_combine_and_split():
+def test_dag_combine_and_split():
     class Generate42(Step):
         def run(self, context) -> NumericResult:
             return NumericResult(data=42)
