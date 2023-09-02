@@ -51,15 +51,11 @@ class StepContext:
     # ruff: noqa: ARG002
     def __init__(
         self,
-        step: Step,
         feeders: list[Step] | None = None,
-        caller: Step | None = None,
         connection: Optional["StepConnection"] | None = None,
     ) -> None:
-        self.step = step
         self.feeders = feeders or []
-        self.caller = caller
-        self.connection = connection or {}
+        self.connection = connection or None
 
     def __repr__(self) -> str:
         # ruff: noqa: D105
@@ -68,6 +64,14 @@ class StepContext:
     def __str__(self) -> str:
         # ruff: noqa: D105
         return self.__repr__()
+
+    @property
+    def step(self):
+        return self.connection.step
+
+    @property
+    def caller(self):
+        return self.connection.caller
 
     @property
     def results(self):

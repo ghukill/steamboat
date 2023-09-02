@@ -100,6 +100,9 @@ class Runner:
                 step: step.caller_result[self.terminal_step] for step in terminal_feeders
             }
 
+    def get_connection(self, step, caller):
+        return self.dag.edges[(step, caller)]["connection"]
+
     def get_results(self, results_format: str):
         if self._results_dict is None:
             self.parse_results()
@@ -120,10 +123,8 @@ class Runner:
 
     def prepare_step_context(self, step, caller):
         return StepContext(
-            step=step,
+            connection=self.get_connection(step, caller),
             feeders=list(self.get_feeders(step)),
-            caller=caller,
-            connection=self.dag.edges[(step, caller)]["connection"], # TODO: to method
         )
 
     def run(self, results_format="dict"):
