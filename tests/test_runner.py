@@ -20,7 +20,7 @@ def test_runner_combine_and_split():
 
     class EvaluateNumber(Step):
         def run(self, context) -> NumericResult | NoneResult:
-            if context.caller_args["checker"](context.results.data):
+            if context.connection.args["checker"](context.results.data):
                 return NumericResult(data=84)
             else:
                 return NoneResult()

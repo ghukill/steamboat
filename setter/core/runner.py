@@ -43,10 +43,11 @@ class Runner:
 
     def add_connection(self, connection: StepConnection) -> None:
         """Add a Connection between two Steps."""
-        for step in [connection.step, connection.next_step]:
+        for step in [connection.step, connection.caller]:
             if not self.dag.has_node(step):
                 self.add_step(step)
-        self.dag.add_edge(connection.step, connection.next_step, **connection.args)
+        # self.dag.add_edge(connection.step, connection.next_step, **connection.args)
+        self.dag.add_edge(connection.step, connection.caller, **{"connection":connection})
 
     def clear(self) -> None:
         self.dag = nx.DiGraph()
@@ -122,7 +123,7 @@ class Runner:
             step=step,
             feeders=list(self.get_feeders(step)),
             caller=caller,
-            caller_args=self.dag.edges[(step, caller)],
+            connection=self.dag.edges[(step, caller)]["connection"], # TODO: to method
         )
 
     def run(self, results_format="dict"):

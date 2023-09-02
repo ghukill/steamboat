@@ -54,12 +54,12 @@ class StepContext:
         step: Step,
         feeders: list[Step] | None = None,
         caller: Step | None = None,
-        caller_args: dict | None = None,
+        connection: Optional["StepConnection"] | None = None,
     ) -> None:
         self.step = step
         self.feeders = feeders or []
         self.caller = caller
-        self.caller_args = caller_args or {}
+        self.connection = connection or {}
 
     def __repr__(self) -> str:
         # ruff: noqa: D105
@@ -89,5 +89,5 @@ class StepConnection:
     """
 
     step: Step
-    next_step: Step
+    caller: Step
     args: dict = attrib(factory=dict)
