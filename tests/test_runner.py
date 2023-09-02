@@ -9,6 +9,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 def test_runner_combine_and_split():
     class Generate42(Step):
         def run(self, context) -> NumericResult:
@@ -16,11 +17,17 @@ def test_runner_combine_and_split():
 
     class AddNumbers(Step):
         def run(self, context) -> NumericResult:
-            return NumericResult(data=sum([result.data for result in context.results]))
+            logger.info("Adding numbers...")
+            # TODO: improve the ergonomics of getting feeder results
+            return NumericResult(
+                data=sum(
+                    [feeder.result.data for feeder in context.feeder_connections.values()]
+                )
+            )
 
     class EvaluateNumber(Step):
         def run(self, context) -> NumericResult | NoneResult:
-            if context.connection.args["checker"](context.results.data):
+            if context.caller_connection.args["checker"](context.results.data):
                 return NumericResult(data=84)
             else:
                 return NoneResult()

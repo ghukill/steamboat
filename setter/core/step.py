@@ -51,15 +51,15 @@ class StepContext:
     # ruff: noqa: ARG002
     def __init__(
         self,
-        feeders: list[Step] | None = None,
-        connection: Optional["StepConnection"] | None = None,
+        caller_connection: Optional["StepConnection"] | None = None,
+        feeder_connections: dict["StepConnection", "StepConnection"] | None = None,
     ) -> None:
-        self.feeders = feeders or []
-        self.connection = connection or None
+        self.caller_connection = caller_connection or None
+        self.feeder_connections = feeder_connections or {}
 
     def __repr__(self) -> str:
         # ruff: noqa: D105
-        return f"<StepContext: feeders={self.feeders}, caller={self.caller}>"
+        return f"<StepContext: caller={self.caller}, feeders={self.feeders}>"
 
     def __str__(self) -> str:
         # ruff: noqa: D105
@@ -67,16 +67,27 @@ class StepContext:
 
     @property
     def step(self):
-        return self.connection.step
+        return self.caller_connection.step
 
     @property
     def caller(self):
-        return self.connection.caller
+        return self.caller_connection.caller
+
+    @property
+    def feeders(self):
+        return [feeder for feeder in self.feeder_connections.keys()]
 
     @property
     def results(self):
-        feeder_results = [feeder.caller_result[self.step] for feeder in self.feeders]
-        # QUESTION: return scalar if list 1?
+        """Return the results of this Context.
+
+        A StepContext always has ONE caller Step, but may have MULTIPLE feeder Steps.
+        For convenience, if only a single feeder Step is present, return that StepResult
+        as a scalar value here.  Otherwise, return a list of StepResults.
+        """
+        feeder_results = [
+            connection.result for connection in self.feeder_connections.values()
+        ]
         if len(feeder_results) == 1:
             return feeder_results[0]
         return feeder_results
@@ -84,14 +95,18 @@ class StepContext:
 
 @attrs(auto_attribs=True)
 class StepConnection:
-    """Directional connection between two Steps.
+    """Directional connection between Step and "caller" Step.
 
     Example: X --> Y
-    The result of this connection where Y is "calling" X, is stored on this Connection
-    by the Runner.  The Step X merely returns a value, but the Runner is aware of which
-    "caller" invoked it.
+
+    When X.run() is invoked, it's always in the context of a "calling" Step, even if this
+    Step is the TerminalStep.  We can say that X was "called" by Y.  This becomes
+    relevant if Y may pass additional arguments for X to, optionally, consider during
+    running.  For all these reasons, the result of X's output is stored on this
+    StepConnection which is unique to "X being called by Y".
     """
 
     step: Step
     caller: Step
     args: dict = attrib(factory=dict)
+    result: StepResult = attrib(factory=NoneResult)

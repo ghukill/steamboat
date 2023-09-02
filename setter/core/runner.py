@@ -47,7 +47,9 @@ class Runner:
             if not self.dag.has_node(step):
                 self.add_step(step)
         # self.dag.add_edge(connection.step, connection.next_step, **connection.args)
-        self.dag.add_edge(connection.step, connection.caller, **{"connection":connection})
+        self.dag.add_edge(
+            connection.step, connection.caller, **{"connection": connection}
+        )
 
     def clear(self) -> None:
         self.dag = nx.DiGraph()
@@ -93,19 +95,36 @@ class Runner:
         for step in self.dag.successors(step):
             yield step
 
-    def parse_results(self) -> None:
-        if self._results_dict is None:
-            terminal_feeders = list(self.get_feeders(self.terminal_step))
-            self._results_dict = {
-                step: step.caller_result[self.terminal_step] for step in terminal_feeders
-            }
-
     def get_connection(self, step, caller):
         return self.dag.edges[(step, caller)]["connection"]
 
+    @property
+    def terminal_feeder_steps(self):
+        return list(self.get_feeders(self.terminal_step))
+
+    @property
+    def terminal_feeder_connections(self):
+        return [
+            self.get_connection(step, self.terminal_step)
+            for step in self.terminal_feeder_steps
+        ]
+
+    def get_terminal_results(self) -> dict:
+        return {
+            connection.step: connection.result
+            for connection in self.terminal_feeder_connections
+        }
+
     def get_results(self, results_format: str):
+        """Get results of all Steps that feed into TerminalStep.
+
+        The results are saved on the Step --> TerminalStep StepConnection.
+        """
+        # parse and cache results
         if self._results_dict is None:
-            self.parse_results()
+            self._results_dict = self.get_terminal_results()
+
+        # prepare output
         results_format = results_format.lower().strip()
         if results_format == "dict":
             return self._results_dict
@@ -122,9 +141,13 @@ class Runner:
             raise Exception(f"Unknown results format: {results_format}")
 
     def prepare_step_context(self, step, caller):
+        logging.info(f"preparing step context: {step} --> {caller}")
         return StepContext(
-            connection=self.get_connection(step, caller),
-            feeders=list(self.get_feeders(step)),
+            caller_connection=self.get_connection(step, caller),
+            feeder_connections={
+                feeder: self.get_connection(feeder, step)
+                for feeder in self.get_feeders(step)
+            },
         )
 
     def run(self, results_format="dict"):
@@ -139,6 +162,7 @@ class Runner:
                 context = self.prepare_step_context(step, caller)
                 logger.info(f"running Step: {step} with context: {context}")
                 result = step.run(context)
-                step.caller_result[caller] = result
+                # step.caller_result[caller] = result
+                context.caller_connection.result = result
 
         return self.get_results(results_format)
