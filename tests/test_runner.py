@@ -11,11 +11,11 @@ logger = logging.getLogger(__name__)
 
 
 def test_dag_combine_and_split():
-    class Generate42(Step):
+    class Generate42(Step[NoneResult, NumericResult]):
         def run(self, context) -> NumericResult:
             return NumericResult(data=42)
 
-    class AddNumbers(Step):
+    class AddNumbers(Step[NumericResult, NumericResult]):
         def run(self, context) -> NumericResult:
             logger.info("Adding numbers...")
             # TODO: improve the ergonomics of getting feeder results
@@ -25,14 +25,14 @@ def test_dag_combine_and_split():
                 )
             )
 
-    class EvaluateNumber(Step):
+    class EvaluateNumber(Step[NumericResult, NumericResult | NoneResult]):
         def run(self, context) -> NumericResult | NoneResult:
             if context.caller_connection.args["checker"](context.results.data):
                 return NumericResult(data=84)
             else:
                 return NoneResult()
 
-    class NumberPrinter(Step):
+    class NumberPrinter(Step[NumericResult | NoneResult, NoneResult]):
         def run(self, context) -> NoneResult | NoneResult:
             res = context.results
             if isinstance(res, NumericResult):
