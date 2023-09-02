@@ -3,7 +3,7 @@
 import pytest
 
 from setter.core.step import Step, StepContext, StepConnection
-from setter.core.result import StringResult
+from setter.core.result import NoneResult, NumericResult, StringResult
 from setter.core.runner import Runner
 
 
@@ -14,7 +14,7 @@ def step_context_empty():
 
 @pytest.fixture
 def generate_text_step():
-    class GenerateText(Step):
+    class GenerateText(Step[NoneResult, StringResult]):
         def run(self, context: StepContext) -> StringResult:
             return StringResult(data="hello world!")
 
@@ -23,11 +23,20 @@ def generate_text_step():
 
 @pytest.fixture
 def reverse_text_step():
-    class ReverseText(Step):
+    class ReverseText(Step[StringResult, StringResult]):
         def run(self, context: StepContext) -> StringResult:
             return StringResult(data=context.results.data[::-1])
 
     return ReverseText
+
+
+@pytest.fixture
+def generate_number_step():
+    class GenerateNumber(Step[NoneResult, NumericResult]):
+        def run(self, context: StepContext) -> NumericResult:
+            return NumericResult(data=42)
+
+    return GenerateNumber
 
 
 @pytest.fixture

@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Callable
 from typing import Any, Generic, get_type_hints, Optional
+from typing import Type, TypeVar, get_args, get_origin
 
 from attr import attrs, attrib
 
@@ -16,7 +17,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class Step(ABC, Generic[Output_StepResult]):
+class Step(ABC, Generic[Input_StepResult, Output_StepResult]):
     """Unit of work in a Setter DAG."""
 
     # ruff: noqa: ARG002
@@ -43,6 +44,34 @@ class Step(ABC, Generic[Output_StepResult]):
         :param context: StepContext instance, containing Runner information and upstream
             Steps
         """
+
+    @property
+    def return_type(self) -> type:
+        """
+        Property to inspect the returned type from the primary run method.
+        """
+        return get_type_hints(self.run)["return"]
+
+    @property
+    def expected_input_type(self) -> Type:
+        """Method to fetch the expected input type of a class extending Step.
+
+        This works by using .__orig_bases__ which has the typed Generics that were used
+        in this Step type's definition.
+
+        Example:
+        Goober(Step[StringResult, NumericResult])
+
+        In this example, the Step type Goober is expecting a StringResult as input, and
+        will return a NumericResult.  These are hydrating the Generic types for Step that
+        are established in Step definition, Generic[Input_StepResult, Output_StepResult].
+        """
+        orig_bases = type(self).__orig_bases__
+        for base in orig_bases:
+            if get_origin(base) is Step:
+                generic_args = get_args(base)
+                expected_input_type = generic_args[0]
+                return expected_input_type
 
 
 class StepContext:
@@ -110,3 +139,10 @@ class StepConnection:
     caller: Step
     args: dict = attrib(factory=dict)
     result: StepResult = attrib(factory=NoneResult)
+
+    def validate(self):
+        """Validate a StepConnection
+
+        Ensure the Step returns a value the caller Step is prepared to handle.
+        """
+        return self.step.return_type == self.caller.expected_input_type
