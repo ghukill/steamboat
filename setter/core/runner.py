@@ -231,22 +231,15 @@ class Runner:
             runner.add_connection(StepConnection(step, caller))
         return runner.run(results_format="scalar")
 
-    def parallel_run(self, results_format="dict", method="thread"):
+    def parallel_run(self, results_format="dict"):
         """Run DAG Steps in parallel where possible."""
         t0 = time.time()
         self.finalize_dag()
         self.log_as_ascii()
 
-        if method == "thread":
-            executor_type = ThreadPoolExecutor
-        elif method == "process":
-            executor_type = ProcessPoolExecutor
-        else:
-            raise Exception(f"parallel method '{method}' not recognized")
-
         for layer in self.parallel_topographic_step_sort():
             logger.info(f"Running steps in parallel from layer: {layer}")
-            with executor_type() as executor:
+            with ThreadPoolExecutor() as executor:
                 future_to_step = {
                     executor.submit(self.run_step, step): step for step in layer
                 }
