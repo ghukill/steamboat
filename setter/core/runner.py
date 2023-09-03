@@ -1,7 +1,8 @@
 import logging
-from collections import defaultdict
+from collections import defaultdict, deque
 from collections.abc import Generator
-from enum import Enum
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import time
 from typing import Any, TypeVar, get_args, get_origin, Optional, Type
 
 import networkx as nx
@@ -40,6 +41,15 @@ class Runner:
         step_attrs = step_attrs or {}
         step_attrs.setdefault("active", True)
         self.dag.add_node(step, **step_attrs)
+
+    def get_step_by_name(self, name: str) -> Step:
+        """Get Step instance by name
+
+        QUESTION: should names be required unique across all Steps
+        """
+        for step in self.dag.nodes:
+            if step.name == name:
+                return step
 
     def add_connection(self, connection: StepConnection) -> None:
         """Add a Connection between two Steps."""
@@ -150,20 +160,38 @@ class Runner:
             },
         )
 
-    def run(self, results_format="dict"):
+    def run_step(self, step):
+        for caller in self.get_callers(step):
+            context = self.prepare_step_context(step, caller)
+            logger.info(f"running Step: {step} with context: {context}")
+            result = step.run(context)
+            context.caller_connection.result = result
+
+    def run(
+        self,
+        results_format="dict",
+        exclude_steps: list[Step] | None = None,
+    ):
         """ """
+        t0 = time.time()
+        exclude_steps = exclude_steps or []
 
         self.finalize_dag()
 
         self.log_as_ascii()
 
         for step in self.topographic_step_sort():
-            for caller in self.get_callers(step):
-                context = self.prepare_step_context(step, caller)
-                logger.info(f"running Step: {step} with context: {context}")
-                result = step.run(context)
-                context.caller_connection.result = result
+            if step in exclude_steps:
+                logger.warning(f"excluding step: {step}")
+                continue
+            # for caller in self.get_callers(step):
+            #     context = self.prepare_step_context(step, caller)
+            #     logger.info(f"running Step: {step} with context: {context}")
+            #     result = step.run(context)
+            #     context.caller_connection.result = result
+            self.run_step(step)
 
+        logger.info(f"elapsed: {time.time() - t0}")
         return self.get_results(results_format)
 
     @classmethod
@@ -175,3 +203,53 @@ class Runner:
         for step, caller in adjacent_steps:
             runner.add_connection(StepConnection(step, caller))
         return runner.run(results_format="scalar")
+
+    def parallel_dag_layers(self):
+        levels = []
+        queue = deque()
+        in_degree = {}
+
+        for node in self.dag.nodes():
+            in_degree[node] = self.dag.in_degree(node)
+            # Nodes with in-degree 0 can be processed immediately
+            if in_degree[node] == 0:
+                queue.append(node)
+
+        while queue:
+            current_level = []
+            for _ in range(len(queue)):
+                node = queue.popleft()
+                current_level.append(node)
+                for neighbor in self.dag.neighbors(node):
+                    in_degree[neighbor] -= 1
+                    if in_degree[neighbor] == 0:
+                        queue.append(neighbor)
+            levels.append(current_level)
+
+        return levels
+
+    def parallel_run(
+        self,
+        results_format="dict",
+    ):
+        """Run DAG Steps in parallel where possible."""
+        t0 = time.time()
+        self.finalize_dag()
+        self.log_as_ascii()
+
+        for layer in self.parallel_dag_layers():
+            logger.info(f"Running steps in parallel from layer: {layer}")
+
+            with ThreadPoolExecutor() as executor:
+                future_to_step = {
+                    executor.submit(self.run_step, step): step for step in layer
+                }
+                for future in as_completed(future_to_step):
+                    step = future_to_step[future]
+                    try:
+                        future.result()
+                    except Exception as exc:
+                        logger.error(f"{step} generated an exception: {exc}")
+
+        logger.info(f"elapsed: {time.time()-t0}")
+        return self.get_results(results_format)
