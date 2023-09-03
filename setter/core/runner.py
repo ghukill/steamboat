@@ -66,11 +66,11 @@ class Runner:
 
     @property
     def steps(self) -> list[Step]:
-        return [self.dag.nodes(data=True)]
+        return [step for step in self.dag.nodes(data=True)]
 
     @property
     def connections(self) -> list[Step]:
-        return [self.dag.edges(data=True)]
+        return [connection for connection in self.dag.edges(data=True)]
 
     def topographic_step_sort(self) -> Generator[Step, Any, Any]:
         for step in nx.topological_sort(self.dag):
