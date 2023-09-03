@@ -28,11 +28,21 @@ def test_quick_run(generate_text_step, reverse_text_step):
     )
 
 
-def test_parallel_run(combine_and_split_dag_runner):
+def test_parallel_run_threads(combine_and_split_dag_runner):
     runner = combine_and_split_dag_runner
     D = runner.get_step_by_name("D")
     E = runner.get_step_by_name("E")
-    results = runner.parallel_run()
+    results = runner.parallel_run(method="thread")
+    assert isinstance(results[D], NumericResult)
+    assert isinstance(results[E], NoneResult)
+    assert len(runner.get_results(results_format="list")) == 2
+
+
+def test_parallel_run_processes(combine_and_split_dag_runner):
+    runner = combine_and_split_dag_runner
+    D = runner.get_step_by_name("D")
+    E = runner.get_step_by_name("E")
+    results = runner.parallel_run(method="process")
     assert isinstance(results[D], NumericResult)
     assert isinstance(results[E], NoneResult)
     assert len(runner.get_results(results_format="list")) == 2

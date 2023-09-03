@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict, deque
 from collections.abc import Generator
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 import time
 from typing import Any, TypeVar, get_args, get_origin, Optional, Type
 
@@ -223,19 +223,22 @@ class Runner:
             runner.add_connection(StepConnection(step, caller))
         return runner.run(results_format="scalar")
 
-    def parallel_run(
-        self,
-        results_format="dict",
-    ):
+    def parallel_run(self, results_format="dict", method="thread"):
         """Run DAG Steps in parallel where possible."""
         t0 = time.time()
         self.finalize_dag()
         self.log_as_ascii()
 
+        if method == "thread":
+            executor_type = ThreadPoolExecutor
+        elif method == "process":
+            executor_type = ProcessPoolExecutor
+        else:
+            raise Exception(f"parallel method '{method}' not recognized")
+
         for layer in self.parallel_topographic_step_sort():
             logger.info(f"Running steps in parallel from layer: {layer}")
-
-            with ThreadPoolExecutor() as executor:
+            with executor_type() as executor:
                 future_to_step = {
                     executor.submit(self.run_step, step): step for step in layer
                 }

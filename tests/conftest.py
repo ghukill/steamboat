@@ -67,12 +67,7 @@ def combine_and_split_dag_runner():
     class AddNumbers(Step[NumericResult, NumericResult]):
         def run(self, context) -> NumericResult:
             logger.info("Adding numbers...")
-            # TODO: improve the ergonomics of getting feeder results
-            return NumericResult(
-                data=sum(
-                    [feeder.result.data for feeder in context.feeder_connections.values()]
-                )
-            )
+            return NumericResult(data=sum([result.data for result in context.results]))
 
     class EvaluateNumber(Step[NumericResult, NumericResult | NoneResult]):
         def run(self, context) -> NumericResult | NoneResult:
