@@ -64,6 +64,14 @@ class Runner:
     def clear(self) -> None:
         self.dag = nx.DiGraph()
 
+    @property
+    def steps(self) -> list[Step]:
+        return [self.dag.nodes(data=True)]
+
+    @property
+    def connections(self) -> list[Step]:
+        return [self.dag.edges(data=True)]
+
     def topographic_step_sort(self) -> Generator[Step, Any, Any]:
         for step in nx.topological_sort(self.dag):
             yield step
