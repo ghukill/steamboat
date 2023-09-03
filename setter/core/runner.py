@@ -1,13 +1,14 @@
+"""core.runner"""
+
 import logging
-from collections import defaultdict, deque
-from collections.abc import Generator
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 import time
-from typing import Any, TypeVar, get_args, get_origin, Optional, Type
+from collections import deque
+from collections.abc import Generator
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from itertools import pairwise
+from typing import Any
 
 import networkx as nx
-from IPython import embed
-from networkx.classes.reportviews import EdgeView, NodeView
 
 from setter.core.result import NoneResult, StepResult
 from setter.core.step import Step, StepConnection, StepContext
@@ -20,17 +21,19 @@ logger = logging.getLogger(__name__)
 
 
 class _RootStep(Step):
+    # ruff: noqa: ARG002
     def run(self, context: StepContext | None = None) -> NoneResult:
         return NoneResult()
 
 
 class _TerminalStep(Step):
+    # ruff: noqa: ARG002
     def run(self, context: StepContext | None = None) -> NoneResult:
         return NoneResult()
 
 
 class Runner:
-    def __init__(self):
+    def __init__(self) -> None:
         self.dag = nx.DiGraph()
         self.root_step: _RootStep = _RootStep()
         self.terminal_step: _TerminalStep = _TerminalStep()
@@ -42,7 +45,7 @@ class Runner:
         step_attrs.setdefault("active", True)
         self.dag.add_node(step, **step_attrs)
 
-    def get_step_by_name(self, name: str) -> Step:
+    def get_step_by_name(self, name: str) -> Step | None:
         """Get Step instance by name
 
         QUESTION: should names be required unique across all Steps
@@ -50,35 +53,32 @@ class Runner:
         for step in self.dag.nodes:
             if step.name == name:
                 return step
+        return None
 
     def add_connection(self, connection: StepConnection) -> None:
         """Add a Connection between two Steps."""
         for step in [connection.step, connection.caller]:
             if not self.dag.has_node(step):
                 self.add_step(step)
-        # self.dag.add_edge(connection.step, connection.next_step, **connection.args)
-        self.dag.add_edge(
-            connection.step, connection.caller, **{"connection": connection}
-        )
+        self.dag.add_edge(connection.step, connection.caller, connection=connection)
 
     def clear(self) -> None:
         self.dag = nx.DiGraph()
 
     @property
     def steps(self) -> list[Step]:
-        return [step for step in self.dag.nodes(data=True)]
+        return list(self.dag.nodes(data=True))
 
     @property
     def connections(self) -> list[Step]:
-        return [connection for connection in self.dag.edges(data=True)]
+        return list(self.dag.edges(data=True))
 
     def topographic_step_sort(self) -> Generator[Step, Any, Any]:
-        for step in nx.topological_sort(self.dag):
-            yield step
+        yield from nx.topological_sort(self.dag)  # type: ignore[func-returns-value]
 
-    def parallel_topographic_step_sort(self):
+    def parallel_topographic_step_sort(self) -> list[list[Step]]:
         levels = []
-        queue = deque()
+        queue = deque()  # type: ignore[var-annotated]
         in_degree = {}
 
         for node in self.dag.nodes():
@@ -129,23 +129,21 @@ class Runner:
         for old_terminal_step in old_terminal_steps:
             self.add_connection(StepConnection(old_terminal_step, self.terminal_step))
 
-    def get_feeders(self, step: Step):
-        for step in self.dag.predecessors(step):
-            yield step
+    def get_feeders(self, step: Step) -> Generator[Step, Any, Any]:
+        yield from self.dag.predecessors(step)
 
-    def get_callers(self, step: Step):
-        for step in self.dag.successors(step):
-            yield step
+    def get_callers(self, step: Step) -> Generator[Step, Any, Any]:
+        yield from self.dag.successors(step)
 
-    def get_connection(self, step, caller):
+    def get_connection(self, step: Step, caller: Step) -> StepConnection:
         return self.dag.edges[(step, caller)]["connection"]
 
     @property
-    def terminal_feeder_steps(self):
+    def terminal_feeder_steps(self) -> list[Step]:
         return list(self.get_feeders(self.terminal_step))
 
     @property
-    def terminal_feeder_connections(self):
+    def terminal_feeder_connections(self) -> list[StepConnection]:
         return [
             self.get_connection(step, self.terminal_step)
             for step in self.terminal_feeder_steps
@@ -157,7 +155,7 @@ class Runner:
             for connection in self.terminal_feeder_connections
         }
 
-    def get_results(self, results_format: str):
+    def get_results(self, results_format: str) -> dict | list | StepResult:
         """Get results of all Steps that feed into TerminalStep.
 
         The results are saved on the Step --> TerminalStep StepConnection.
@@ -170,19 +168,20 @@ class Runner:
         results_format = results_format.lower().strip()
         if results_format == "dict":
             return self._results_dict
-        elif results_format == "list":
-            return [result for result in self._results_dict.values()]
-        elif results_format == "scalar":
-            results = [result for result in self._results_dict.values()]
+        if results_format == "list":
+            return list(self._results_dict.values())
+        if results_format == "scalar":
+            results = list(self._results_dict.values())
             if len(results) != 1:
+                # ruff: noqa: TRY002, TRY003
                 raise Exception(
                     "0 or multiple results found, cannot return scalar StepResult"
                 )
             return results[0]
-        else:
-            raise Exception(f"Unknown results format: {results_format}")
+        # ruff: noqa: TRY002, TRY003, EM102
+        raise Exception(f"Unknown results format: {results_format}")
 
-    def prepare_step_context(self, step, caller):
+    def prepare_step_context(self, step: Step, caller: Step) -> StepContext:
         logging.info(f"preparing step context: {step} --> {caller}")
         return StepContext(
             caller_connection=self.get_connection(step, caller),
@@ -192,19 +191,19 @@ class Runner:
             },
         )
 
-    def run_step(self, step):
+    def run_step(self, step: Step) -> None:
         for caller in self.get_callers(step):
             context = self.prepare_step_context(step, caller)
             logger.info(f"running Step: {step} with context: {context}")
             result = step.run(context)
-            context.caller_connection.result = result
+            context.caller_connection.result = result  # type: ignore[union-attr]
 
     def run(
         self,
-        results_format="dict",
+        results_format: str = "dict",
         exclude_steps: list[Step] | None = None,
-    ):
-        """ """
+    ) -> dict | list | StepResult:
+        """Run Runner DAG Steps."""
         t0 = time.time()
         exclude_steps = exclude_steps or []
 
@@ -222,16 +221,16 @@ class Runner:
         return self.get_results(results_format)
 
     @classmethod
-    def quick_run(cls, step_classes: list[Type[Step]]):
+    def quick_run(cls, step_classes: list[type[Step]]) -> dict | list | StepResult:
         """Quick run of simple, sequential steps, resulting in a single result."""
         runner = cls()
         steps = [step_class() for step_class in step_classes]
-        adjacent_steps = list(zip(steps, steps[1:]))
+        adjacent_steps = list(pairwise(steps))
         for step, caller in adjacent_steps:
             runner.add_connection(StepConnection(step, caller))
         return runner.run(results_format="scalar")
 
-    def parallel_run(self, results_format="dict"):
+    def parallel_run(self, results_format: str = "dict") -> dict | list | StepResult:
         """Run DAG Steps in parallel where possible."""
         t0 = time.time()
         self.finalize_dag()
@@ -247,8 +246,9 @@ class Runner:
                     step = future_to_step[future]
                     try:
                         future.result()
-                    except Exception as exc:
-                        logger.error(f"{step} generated an exception: {exc}")
+                    # ruff: noqa: E722
+                    except:
+                        logger.exception(f"error running Step: {step}")
 
         logger.info(f"elapsed: {time.time()-t0}")
         return self.get_results(results_format)

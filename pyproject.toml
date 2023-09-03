@@ -11,7 +11,7 @@ module = "smart_open.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "digdag.*"
+module = "setter.*"
 disallow_untyped_calls = false
 
 
@@ -19,14 +19,16 @@ disallow_untyped_calls = false
 select = ["ALL", "PT"]
 target-version = "py311"
 exclude = [
-    "digdag/utils/dagascii.py",
-    "scratch.py"
+    "setter/utils/dagascii.py",
+    "scratch.py",
+    "tests/**/*"
 ]
 
 ignore = [
     "ANN101",
     "ANN102",
     "ANN204",
+    "B905",
     "COM812",
     "D107",
     "N812",
@@ -83,5 +85,5 @@ convention = "google"
 
 [tool.coverage.run]
 omit = [
-    "digdag/utils/dagascii.py"
+    "setter/utils/dagascii.py"
 ]

@@ -3,11 +3,9 @@
 import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from collections.abc import Callable
-from typing import Any, Generic, get_type_hints, Optional
-from typing import Type, TypeVar, get_args, get_origin
+from typing import Generic, Optional, get_args, get_origin, get_type_hints
 
-from attr import attrs, attrib
+from attr import attrib, attrs
 
 from setter.core.result import Input_StepResult, NoneResult, Output_StepResult, StepResult
 
@@ -53,7 +51,7 @@ class Step(ABC, Generic[Input_StepResult, Output_StepResult]):
         return get_type_hints(self.run)["return"]
 
     @property
-    def expected_input_type(self) -> Type:
+    def expected_input_type(self) -> type | None:
         """Method to fetch the expected input type of a class extending Step.
 
         This works by using .__orig_bases__ which has the typed Generics that were used
@@ -66,12 +64,14 @@ class Step(ABC, Generic[Input_StepResult, Output_StepResult]):
         will return a NumericResult.  These are hydrating the Generic types for Step that
         are established in Step definition, Generic[Input_StepResult, Output_StepResult].
         """
-        orig_bases = type(self).__orig_bases__
+        orig_bases = type(self).__orig_bases__  # type: ignore[attr-defined]
         for base in orig_bases:
             if get_origin(base) is Step:
                 generic_args = get_args(base)
                 expected_input_type = generic_args[0]
+                # ruff: noqa: RET504
                 return expected_input_type
+        return None
 
 
 class StepContext:
@@ -80,8 +80,8 @@ class StepContext:
     # ruff: noqa: ARG002
     def __init__(
         self,
-        caller_connection: Optional["StepConnection"] | None = None,
-        feeder_connections: dict["StepConnection", "StepConnection"] | None = None,
+        caller_connection: Optional["StepConnection"] = None,
+        feeder_connections: dict[Step, "StepConnection"] | None = None,
     ) -> None:
         self.caller_connection = caller_connection or None
         self.feeder_connections = feeder_connections or {}
@@ -95,19 +95,23 @@ class StepContext:
         return self.__repr__()
 
     @property
-    def step(self):
-        return self.caller_connection.step
+    def step(self) -> Step | None:
+        if self.caller_connection is not None:
+            return self.caller_connection.step
+        return None
 
     @property
-    def caller(self):
-        return self.caller_connection.caller
+    def caller(self) -> Step | None:
+        if self.caller_connection is not None:
+            return self.caller_connection.caller
+        return None
 
     @property
-    def feeders(self):
-        return [feeder for feeder in self.feeder_connections.keys()]
+    def feeders(self) -> list[Step]:
+        return list(self.feeder_connections.keys())
 
     @property
-    def results(self):
+    def results(self) -> StepResult | list[StepResult]:
         """Return the results of this Context.
 
         A StepContext always has ONE caller Step, but may have MULTIPLE feeder Steps.
@@ -140,7 +144,7 @@ class StepConnection:
     args: dict = attrib(factory=dict)
     result: StepResult = attrib(factory=NoneResult)
 
-    def validate(self):
+    def validate(self) -> bool:
         """Validate a StepConnection
 
         Ensure the Step returns a value the caller Step is prepared to handle.

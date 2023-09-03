@@ -1,13 +1,12 @@
 """tests.conftest"""
 
 import logging
-import time
 
 import pytest
 
-from setter.core.step import Step, StepContext, StepConnection
 from setter.core.result import NoneResult, NumericResult, StringResult
 from setter.core.runner import Runner
+from setter.core.step import Step, StepConnection, StepContext
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"

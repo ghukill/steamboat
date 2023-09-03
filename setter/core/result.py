@@ -1,16 +1,10 @@
-import json
+"""core.result"""
+
 import logging
-import os.path
-from abc import abstractmethod
-from collections.abc import Generator
-from numbers import Number
-from typing import TYPE_CHECKING, Optional, TypeVar
+from typing import Any, TypeVar
 
 import pandas as pd
 from attr import attrs
-
-if TYPE_CHECKING:
-    from setter.core.step import Step
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -20,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 @attrs(auto_attribs=True)
 class StepResult:
-    data: None = None
+    data: Any = None
 
     def __str__(self) -> str:
         # ruff: noqa: D105

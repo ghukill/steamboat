@@ -1,4 +1,4 @@
-from setter.core.result import NoneResult, StringResult, NumericResult
+from setter.core.result import NoneResult, NumericResult, StringResult
 
 
 def test_none_result():
