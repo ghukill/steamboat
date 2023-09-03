@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from collections.abc import Generator
 from enum import Enum
-from typing import Any, TypeVar, get_args, get_origin, Optional
+from typing import Any, TypeVar, get_args, get_origin, Optional, Type
 
 import networkx as nx
 from IPython import embed
@@ -165,3 +165,13 @@ class Runner:
                 context.caller_connection.result = result
 
         return self.get_results(results_format)
+
+    @classmethod
+    def quick_run(cls, step_classes: list[Type[Step]]):
+        """Quick run of simple, sequential steps, resulting in a single result."""
+        runner = cls()
+        steps = [step_class() for step_class in step_classes]
+        adjacent_steps = list(zip(steps, steps[1:]))
+        for step, caller in adjacent_steps:
+            runner.add_connection(StepConnection(step, caller))
+        return runner.run(results_format="scalar")

@@ -15,8 +15,10 @@ def step_context_empty():
 @pytest.fixture
 def generate_text_step():
     class GenerateText(Step[NoneResult, StringResult]):
+        data = "hello world!"
+
         def run(self, context: StepContext) -> StringResult:
-            return StringResult(data="hello world!")
+            return StringResult(data=self.data)
 
     return GenerateText
 

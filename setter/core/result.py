@@ -6,6 +6,7 @@ from collections.abc import Generator
 from numbers import Number
 from typing import TYPE_CHECKING, Optional, TypeVar
 
+import pandas as pd
 from attr import attrs
 
 if TYPE_CHECKING:
@@ -35,6 +36,8 @@ Output_StepResult = TypeVar("Output_StepResult", bound=StepResult)
 class NoneResult(StepResult):
     """StepResult indicating nothing exists or was returned from Step."""
 
+    data: None = None
+
 
 @attrs(auto_attribs=True)
 class StringResult(StepResult):
@@ -44,3 +47,13 @@ class StringResult(StepResult):
 @attrs(auto_attribs=True)
 class NumericResult(StepResult):
     data: int | float
+
+
+@attrs(auto_attribs=True)
+class ListResult(StepResult):
+    data: list | tuple
+
+
+@attrs(auto_attribs=True)
+class DataFrameResult(StepResult):
+    data: pd.DataFrame

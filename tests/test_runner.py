@@ -61,3 +61,10 @@ def test_dag_combine_and_split():
     assert isinstance(results[d], NumericResult)
     assert isinstance(results[e], NoneResult)
     assert len(runner.get_results(results_format="list")) == 2
+
+
+def test_quick_run(generate_text_step, reverse_text_step):
+    assert (
+        Runner.quick_run([generate_text_step, reverse_text_step]).data
+        == generate_text_step.data[::-1]
+    )
