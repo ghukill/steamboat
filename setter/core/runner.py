@@ -221,7 +221,7 @@ class Runner:
         return self.get_results(results_format)
 
     @classmethod
-    def quick_run(cls, step_classes: list[type[Step]]) -> dict | list | StepResult:
+    def quick_run(cls, step_classes: list[type[Step]]) -> StepResult:
         """Quick run of simple, sequential steps, resulting in a single result."""
         runner = cls()
         steps = [step_class() for step_class in step_classes]
