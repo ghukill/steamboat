@@ -22,4 +22,4 @@ ruff-apply:
 	pipenv run ruff check --fix .
 
 example:
-	PYTHONPATH=. python examples/$(name).py
+	PYTHONPATH=. pipenv run python examples/$(name).py
