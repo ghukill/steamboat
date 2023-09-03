@@ -1,6 +1,7 @@
 import logging
+import time
 
-from setter.core.step import Step, StepConnection
+from setter.core.step import Step, StepConnection, StepContext
 from setter.core.result import NoneResult, NumericResult
 from setter.core.runner import Runner
 
@@ -35,3 +36,44 @@ def test_parallel_run(combine_and_split_dag_runner):
     assert isinstance(results[D], NumericResult)
     assert isinstance(results[E], NoneResult)
     assert len(runner.get_results(results_format="list")) == 2
+
+
+def test_parallel_faster_than_sequential_when_waiting():
+    class Sleeper(Step):
+        def run(self, context: StepContext) -> NumericResult:
+            t0 = time.time()
+            time.sleep(1)
+            elapsed = time.time() - t0
+            return NumericResult(data=elapsed)
+
+    class Combiner(Step[NumericResult, NumericResult]):
+        def run(self, context: "StepContext") -> NumericResult:
+            return NumericResult(data=sum([result.data for result in context.results]))
+
+    # sequential
+    t0 = time.time()
+    s1 = Sleeper(name="s1")
+    s2 = Sleeper(name="s2")
+    s3 = Sleeper(name="s3")
+    c = Combiner(name="c")
+    runner = Runner()
+    runner.add_connection(StepConnection(s1, c))
+    runner.add_connection(StepConnection(s2, c))
+    runner.add_connection(StepConnection(s3, c))
+    result = runner.run(results_format="scalar")
+    elapsed = time.time() - t0
+    assert elapsed > result.data  # assert that total time is MORE than sum of sleepers
+
+    # parallel
+    t0 = time.time()
+    s1 = Sleeper(name="s1")
+    s2 = Sleeper(name="s2")
+    s3 = Sleeper(name="s3")
+    c = Combiner(name="c")
+    runner = Runner()
+    runner.add_connection(StepConnection(s1, c))
+    runner.add_connection(StepConnection(s2, c))
+    runner.add_connection(StepConnection(s3, c))
+    result = runner.parallel_run(results_format="scalar")
+    elapsed = time.time() - t0
+    assert elapsed < result.data  # assert that total time is LESS than sum of sleepers
