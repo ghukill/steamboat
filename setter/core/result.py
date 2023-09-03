@@ -49,5 +49,10 @@ class ListResult(StepResult):
 
 
 @attrs(auto_attribs=True)
+class DictResult(StepResult):
+    data: dict
+
+
+@attrs(auto_attribs=True)
 class DataFrameResult(StepResult):
     data: pd.DataFrame

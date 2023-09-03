@@ -73,6 +73,28 @@ class Step(ABC, Generic[Input_StepResult, Output_StepResult]):
                 return expected_input_type
         return None
 
+    def _prepare_step_simulation_context(self, caller_args: dict) -> "StepContext":
+        from setter.core.runner import _RootStep, _TerminalStep
+
+        root_step, terminal_step = _RootStep(), _TerminalStep()
+        context = StepContext(
+            caller_connection=StepConnection(
+                step=self, caller=terminal_step, args=caller_args
+            ),
+            feeder_connections={root_step: StepConnection(step=root_step, caller=self)},
+        )
+        return context
+
+    def simulate(
+        self, context: Optional["StepContext"] = None, caller_args: dict | None = None
+    ) -> Output_StepResult:
+        """Run a Step's .run method, providing a StepContext"""
+        if context is None:
+            caller_args = caller_args or {}
+            context = self._prepare_step_simulation_context(caller_args)
+
+        return self.run(context)
+
 
 class StepContext:
     """Context in which the Step is invoked."""
@@ -105,6 +127,12 @@ class StepContext:
         if self.caller_connection is not None:
             return self.caller_connection.caller
         return None
+
+    @property
+    def caller_args(self) -> dict:
+        if self.caller_connection is not None:
+            return self.caller_connection.args
+        return {}
 
     @property
     def feeders(self) -> list[Step]:
