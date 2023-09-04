@@ -1,10 +1,12 @@
 """setter.extras.xml_extras"""
 
 import logging
+from collections.abc import Generator
 
 from attr import attrs
 
-from setter.core.result import LocalFileResult
+from setter.core.result import GeneratorResult, LocalFileResult
+from setter.core.step import Step, StepContext
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -65,38 +67,43 @@ if dependencies_met:
 
             return nsmap
 
-    # TODO: rework from previous iteration, figure out how to pass args
-    # class ListRepeatingElementsFromXML(Step[XMLLocalFileResult, GeneratorResult]):
-    #     def run(self, step_input: XMLLocalFileResult) -> GeneratorResult:
-    #         def yield_elements_func() -> Generator[etree._Element, None, None]:
-    #             # parse tree
-    #             tree = etree.fromstring(step_input.read_file())
-    #
-    #             # XPath
-    #             xpath_elements = []  # type: ignore[var-annotated]
-    #             if xpath is not None:
-    #                 nsmap = step_input.get_nsmap()
-    #                 xpath_elements = tree.xpath(  # type: ignore[assignment]
-    #                     xpath,
-    #                     namespaces=nsmap,
-    #                 )
-    #
-    #             # lxml findall
-    #             findall_elements = []  # type: ignore[var-annotated]
-    #             if lxml_findall is not None:
-    #                 findall_elements = tree.findall(lxml_findall)
-    #
-    #             # dedupe elements if both approaches
-    #             result = []
-    #             seen = set()
-    #             for element_list in [xpath_elements, findall_elements]:
-    #                 for element in element_list:
-    #                     if id(element) not in seen:
-    #                         result.append(element)
-    #                         seen.add(id(element))
-    #
-    #             # yield to return a generator
-    #             for element in result:
-    #                 yield element
-    #
-    #         return GeneratorResult(data=yield_elements_func())
+    class RepeatingXMLElementsGenerator(Step[XMLLocalFileResult, GeneratorResult]):
+        def run(self, context: StepContext) -> GeneratorResult:
+            xpath = context.caller_args.get("xpath")
+            lxml_findall = context.caller_args.get("lxml_findall")
+
+            def yield_elements_func() -> Generator[etree._Element, None, None]:
+                # NOTE: lack of typing because typed at list[StepResult]
+                # ruff: noqa: E501
+                xml_file_result: XMLLocalFileResult = context.results  # type: ignore [assignment]
+
+                tree = xml_file_result.get_tree()
+
+                # XPath
+                xpath_elements = []  # type: ignore[var-annotated]
+                if xpath is not None:
+                    nsmap = xml_file_result.get_nsmap()
+                    xpath_elements = tree.xpath(  # type: ignore[assignment]
+                        xpath,
+                        namespaces=nsmap,
+                    )
+
+                # lxml findall
+                findall_elements = []  # type: ignore[var-annotated]
+                if lxml_findall is not None:
+                    findall_elements = tree.findall(lxml_findall)
+
+                # dedupe elements if both approaches
+                result = []
+                seen = set()
+                for element_list in [xpath_elements, findall_elements]:
+                    for element in element_list:
+                        if id(element) not in seen:
+                            result.append(element)
+                            seen.add(id(element))
+
+                # yield to return a generator
+                for element in result:
+                    yield element
+
+            return GeneratorResult(data=yield_elements_func())

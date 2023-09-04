@@ -182,7 +182,7 @@ class Runner:
         raise Exception(f"Unknown results format: {results_format}")
 
     def prepare_step_context(self, step: Step, caller: Step) -> StepContext:
-        logging.info(f"preparing step context: {step} --> {caller}")
+        logging.debug(f"preparing step context: {step} --> {caller}")
         return StepContext(
             caller_connection=self.get_connection(step, caller),
             feeder_connections={
