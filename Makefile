@@ -1,6 +1,9 @@
-test: # run tests and print coverage report
-	pipenv run coverage run -m pytest -vv -s --log-cli-level INFO
+test:
+	pipenv run coverage run -m pytest -vv
 	pipenv run coverage report -m
+
+test-verbose:
+	pipenv run pytest -vv -s --log-cli-level INFO
 
 lint: black mypy ruff
 

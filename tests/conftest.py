@@ -1,6 +1,8 @@
 """tests.conftest"""
 
+import glob
 import logging
+import os
 
 import pytest
 
@@ -12,6 +14,36 @@ logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+
+def _check_xml_extras_tests(config, items):
+    from setter.extras.xml_extras import dependencies_met
+
+    for item in items:
+        if item.get_closest_marker("xml_extras") and not dependencies_met:
+            item.add_marker(
+                pytest.mark.skip(reason="dependencies not met for `dataframe_extras`")
+            )
+
+
+def _check_dataframe_extras_tests(config, items):
+    from setter.extras.dataframe_extras import dependencies_met
+
+    for item in items:
+        if item.get_closest_marker("dataframe_extras") and not dependencies_met:
+            item.add_marker(
+                pytest.mark.skip(reason="dependencies not met for `dataframe_extras`")
+            )
+
+
+def pytest_collection_modifyitems(config, items):
+    """Pytest hook that is run after all tests collected.
+
+    https://docs.pytest.org/en/7.1.x/reference/reference.html#pytest.hookspec.pytest_collection_modifyitems
+    """
+
+    # skip tests for extras if dependencies not met
+    _check_dataframe_extras_tests(config, items)
 
 
 @pytest.fixture
@@ -100,3 +132,11 @@ def combine_and_split_dag_runner():
     runner.add_connection(StepConnection(x, e, {"checker": lambda x: x >= 100}))
 
     return runner
+
+
+@pytest.fixture(scope="session", autouse=True)
+def cleanup_files():
+    yield
+    files = glob.glob("tests/scratch/*.*")
+    for f in files:
+        os.remove(f)

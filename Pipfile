@@ -4,12 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-duckdb = "*"
 attrs = "*"
 mypy = "*"
-pandas = "*"
-numpy = "*"
-pandas-stubs = "*"
 networkx = "*"
 grandalf = "*"
 networkx-stubs = "*"
@@ -20,6 +16,10 @@ ipython = "*"
 ruff = "*"
 pytest = "*"
 coveralls = "*"
+pandas = "*"
+numpy = "*"
+pandas-stubs = "*"
+duckdb = "*"
 
 [requires]
 python_version = "3.11"

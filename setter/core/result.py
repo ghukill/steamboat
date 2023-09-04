@@ -1,5 +1,5 @@
 """core.result"""
-
+import json
 import logging
 import os
 from abc import abstractmethod
@@ -89,3 +89,19 @@ class LocalFileResult(FileResult):
     def read_file(self, read_mode: str = "rb") -> bytes | str:
         with open(self.filepath, read_mode) as f:
             return f.read()
+
+
+@attrs(auto_attribs=True)
+class JSONLocalFileResult(LocalFileResult):
+    data: dict | None = None
+
+    def to_dict(self) -> dict:
+        """
+        Load JSON file as python dictionary
+        """
+        return json.loads(self.read_file())
+
+    def to_file(self) -> bool:
+        with open(self.filepath, "w") as f:
+            f.write(json.dumps(self.data))
+        return True

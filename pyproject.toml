@@ -90,3 +90,10 @@ convention = "google"
 omit = [
     "setter/utils/dagascii.py"
 ]
+
+[tool.pytest.ini_options]
+log_level = "INFO"
+markers = [
+    "dataframe_extras: Testes for DataFrame extras",
+    "xml_extras: Tests for XML extras"
+]
