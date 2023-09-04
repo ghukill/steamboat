@@ -10,5 +10,3 @@ class PrintHelloWorld(Step[NoneResult, NoneResult]):
 
 print("via Step.simulate()...")
 PrintHelloWorld().simulate()
-print("via Step.run()...")
-PrintHelloWorld().run(StepContext())

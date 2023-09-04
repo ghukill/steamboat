@@ -4,9 +4,10 @@ Make 10 parallel requests to an API endpoint and combine into a DataFrame
 import pandas as pd
 import requests
 
-from setter.core.result import DataFrameResult, NoneResult, StepResult
+from setter.core.result import NoneResult, StepResult
 from setter.core.runner import Runner
 from setter.core.step import Step, StepContext, StepConnection
+from setter.extras.dataframe_extras import DataFrameResult
 
 
 class WSUAPIResult(StepResult):
