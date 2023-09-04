@@ -1,0 +1,4 @@
+<records xmlns:ns="http://example.com/ns">
+    <ns:record>foo</ns:record>
+    <ns:record>bar</ns:record>
+</records>
