@@ -106,8 +106,7 @@ class Runner:
     def log_as_ascii(self) -> None:
         if len(self.dag.nodes) == 0:
             return
-        logger.info(f"\n{self.graph_to_ascii()}")
-        logger.info(f"topographic sort: {list(self.topographic_step_sort())}")
+        logger.debug(f"\n{self.graph_to_ascii()}")
 
     def finalize_dag(self) -> None:
         """
@@ -233,7 +232,9 @@ class Runner:
     def parallel_run(self, results_format: str = "dict") -> dict | list | StepResult:
         """Run DAG Steps in parallel where possible."""
         t0 = time.time()
+
         self.finalize_dag()
+
         self.log_as_ascii()
 
         for layer in self.parallel_topographic_step_sort():

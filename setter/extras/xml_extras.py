@@ -68,9 +68,18 @@ if dependencies_met:
             return nsmap
 
     class RepeatingXMLElementsGenerator(Step[XMLLocalFileResult, GeneratorResult]):
+        def __init__(
+            self,
+            xpath: str | None = None,
+            lxml_findall: str | None = None,
+        ):
+            super().__init__()
+            self.xpath = xpath
+            self.lxml_findall = lxml_findall
+
         def run(self, context: StepContext) -> GeneratorResult:
-            xpath = context.caller_args.get("xpath")
-            lxml_findall = context.caller_args.get("lxml_findall")
+            xpath = context.caller_args.get("xpath") or self.xpath
+            lxml_findall = context.caller_args.get("lxml_findall") or self.lxml_findall
 
             def yield_elements_func() -> Generator[etree._Element, None, None]:
                 # NOTE: lack of typing because typed at list[StepResult]
