@@ -3,6 +3,7 @@ import json
 import logging
 import os
 from abc import abstractmethod
+from collections.abc import Generator
 from os import PathLike
 from typing import Any, TypeVar
 
@@ -48,6 +49,11 @@ class NumericResult(StepResult):
 @attrs(auto_attribs=True)
 class ListResult(StepResult):
     data: list | tuple
+
+
+@attrs(auto_attribs=True)
+class GeneratorResult(StepResult):
+    data: Generator
 
 
 @attrs(auto_attribs=True)

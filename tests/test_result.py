@@ -71,3 +71,17 @@ def test_csv_local_file_result():
     result = CSVLocalFileResult(filepath="tests/fixtures/test.tsv", delimiter="\t")
     df = result.to_df()
     assert len(df) == 3
+
+
+@pytest.mark.xml_extras()
+def test_xml_local_file_namespace_parser():
+    from setter.extras.xml_extras import XMLLocalFileResult
+
+    r1 = XMLLocalFileResult(filepath="tests/fixtures/xml_no_ns.xml")
+    assert r1.get_nsmap() == {}
+
+    r2 = XMLLocalFileResult(filepath="tests/fixtures/xml_root_ns.xml")
+    assert r2.get_nsmap() == {"ns": "http://example.com/ns"}
+
+    r3 = XMLLocalFileResult(filepath="tests/fixtures/xml_element_ns.xml")
+    assert r3.get_nsmap() == {"ns0": "http://example.com/ns"}

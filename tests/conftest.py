@@ -22,7 +22,7 @@ def _check_xml_extras_tests(config, items):
     for item in items:
         if item.get_closest_marker("xml_extras") and not dependencies_met:
             item.add_marker(
-                pytest.mark.skip(reason="dependencies not met for `dataframe_extras`")
+                pytest.mark.skip(reason="dependencies not met for `xml_extras`")
             )
 
 
@@ -44,6 +44,7 @@ def pytest_collection_modifyitems(config, items):
 
     # skip tests for extras if dependencies not met
     _check_dataframe_extras_tests(config, items)
+    _check_xml_extras_tests(config, items)
 
 
 @pytest.fixture
