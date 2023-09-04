@@ -1,9 +1,11 @@
 """core.result"""
 
 import logging
+import os
+from abc import abstractmethod
+from os import PathLike
 from typing import Any, TypeVar
 
-import pandas as pd
 from attr import attrs
 
 logging.basicConfig(
@@ -54,5 +56,36 @@ class DictResult(StepResult):
 
 
 @attrs(auto_attribs=True)
-class DataFrameResult(StepResult):
-    data: pd.DataFrame
+class FileResult(StepResult):
+    @property
+    @abstractmethod
+    def file_exists(self) -> bool:
+        ...  # pragma: no cover
+
+    @abstractmethod
+    def read_file(self) -> bytes | str:
+        ...  # pragma: no cover
+
+
+@attrs(auto_attribs=True)
+class LocalFileResult(FileResult):
+    filepath: str | bytes | PathLike[str] | PathLike[bytes] = ""
+    protected: bool = True
+
+    @property
+    def file_exists(self) -> bool:
+        return os.path.exists(self.filepath)
+
+    def remove_file(self) -> bool:
+        if self.protected:
+            raise PermissionError(
+                f"File {self.filepath!r} has protected flag and may not be removed."
+            )
+        if self.file_exists:
+            os.remove(self.filepath)
+            return True
+        return False
+
+    def read_file(self, read_mode: str = "rb") -> bytes | str:
+        with open(self.filepath, read_mode) as f:
+            return f.read()
