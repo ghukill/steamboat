@@ -14,8 +14,7 @@ setup(
             "lxml>=4.9.0",
         ],
         "dataframe": [
-            "pandas>=2.1.0",
-            "duckdb>=0.8.1",
+            # TODO: iron out pandas, duckdb
         ],
     },
 )

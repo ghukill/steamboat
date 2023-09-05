@@ -1,4 +1,5 @@
 import os.path
+import pickle
 
 import pytest
 
@@ -71,6 +72,21 @@ def test_csv_local_file_result():
     result = CSVLocalFileResult(filepath="tests/fixtures/test.tsv", delimiter="\t")
     df = result.to_df()
     assert len(df) == 3
+
+
+@pytest.mark.dataframe_extras()
+def test_df_to_duckdb_to_df():
+    from setter.extras.dataframe_extras import DataFrameResult, DuckDbTableResult
+
+    with open("tests/fixtures/test-df.pickle", "rb") as f:
+        df = pickle.load(f)
+
+    tmp_db_filepath = "tests/scratch/df_to_duck.db"
+    table_name = "df_to_duck"
+    x = DataFrameResult(data=df)
+    assert x.to_duckdb(filepath=tmp_db_filepath, table_name=table_name)
+    y = DuckDbTableResult(filepath=tmp_db_filepath, table_name=table_name)
+    assert len(y.to_df()) == 3
 
 
 @pytest.mark.xml_extras()

@@ -19,7 +19,7 @@ try:
 
     dependencies_met = True
 except ImportError:
-    msg = "dependencies not met for 'xml_extras', install with setter[dataframe]"
+    msg = "dependencies not met for 'xml_extras', install with setter[xml]"
     logger.warning(msg)
 
 if dependencies_met:
