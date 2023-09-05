@@ -23,7 +23,7 @@ def test_dag_combine_and_split(combine_and_split_dag_runner):
 
 def test_quick_run(generate_text_step, reverse_text_step):
     assert (
-        Runner.quick_run([generate_text_step, reverse_text_step]).data
+        Runner.run_quick([generate_text_step, reverse_text_step]).data
         == generate_text_step.data[::-1]
     )
 
@@ -32,7 +32,7 @@ def test_parallel_run(combine_and_split_dag_runner):
     runner = combine_and_split_dag_runner
     D = runner.get_step_by_name("D")
     E = runner.get_step_by_name("E")
-    results = runner.parallel_run()
+    results = runner.run_parallel()
     assert isinstance(results[D], NumericResult)
     assert isinstance(results[E], NoneResult)
     assert len(runner.get_results(results_format="list")) == 2
@@ -74,6 +74,6 @@ def test_parallel_faster_than_sequential_when_waiting():
     runner.add_connection(StepConnection(s1, c))
     runner.add_connection(StepConnection(s2, c))
     runner.add_connection(StepConnection(s3, c))
-    result = runner.parallel_run(results_format="scalar")
+    result = runner.run_parallel(results_format="scalar")
     elapsed = time.time() - t0
     assert elapsed < result.data  # assert that total time is LESS than sum of sleepers

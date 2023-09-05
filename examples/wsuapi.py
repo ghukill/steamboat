@@ -59,6 +59,6 @@ for search_term in [
         )
     )
 
-df = runner.parallel_run(results_format="scalar").data
+df = runner.run_parallel(results_format="scalar").data
 for idx, row in df.iterrows():
     print(row.search_term, "-->", row.dc_title[0])

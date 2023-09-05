@@ -48,6 +48,6 @@ class FruitPicker(Step[GeneratorResult, NumericResult]):
         return ListResult(data=instructions)
 
 
-result = Runner.quick_run([NumberGenerator, FruitPickerInstructions, FruitPicker])
+result = Runner.run_quick([NumberGenerator, FruitPickerInstructions, FruitPicker])
 print("And the final list of instructions, each generated in their own sequential steps")
 print(result.data)

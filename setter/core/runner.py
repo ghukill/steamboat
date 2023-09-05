@@ -220,7 +220,7 @@ class Runner:
         return self.get_results(results_format)
 
     @classmethod
-    def quick_run(cls, step_classes: list[type[Step]]) -> dict | list | StepResult:
+    def run_quick(cls, step_classes: list[type[Step]]) -> dict | list | StepResult:
         """Quick run of simple, sequential steps, resulting in a single result."""
         runner = cls()
         steps = [step_class() for step_class in step_classes]
@@ -229,7 +229,7 @@ class Runner:
             runner.add_connection(StepConnection(step, caller))
         return runner.run(results_format="scalar")
 
-    def parallel_run(self, results_format: str = "dict") -> dict | list | StepResult:
+    def run_parallel(self, results_format: str = "dict") -> dict | list | StepResult:
         """Run DAG Steps in parallel where possible."""
         t0 = time.time()
 
@@ -240,11 +240,11 @@ class Runner:
         for layer in self.parallel_topographic_step_sort():
             logger.info(f"Running steps in parallel from layer: {layer}")
             with ThreadPoolExecutor() as executor:
-                future_to_step = {
+                future_step_runs = {
                     executor.submit(self.run_step, step): step for step in layer
                 }
-                for future in as_completed(future_to_step):
-                    step = future_to_step[future]
+                for future in as_completed(future_step_runs):
+                    step = future_step_runs[future]
                     try:
                         future.result()
                     # ruff: noqa: E722
