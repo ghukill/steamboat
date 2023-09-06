@@ -10,7 +10,8 @@ from typing import Any
 
 import networkx as nx
 
-from setter.core.result import NoneResult, StepResult
+from setter.core.exceptions import StepRunError, StepRunSkip
+from setter.core.result import ErrorResult, NoneResult, SkipResult, StepResult
 from setter.core.step import Step, StepConnection, StepContext
 from setter.utils.dagascii import draw as draw_graph
 
@@ -193,8 +194,21 @@ class Runner:
     def run_step(self, step: Step) -> None:
         for caller in self.get_callers(step):
             context = self.prepare_step_context(step, caller)
-            logger.info(f"running Step: {step} with context: {context}")
-            result = step.run(context)
+            if isinstance(context.results, ErrorResult | SkipResult):
+                result = context.results
+            else:
+                logger.info(f"running Step: {step} with context: {context}")
+                try:
+                    result = step.run(context)
+                except StepRunSkip as e:
+                    result = SkipResult(connection=context.caller_connection, exception=e)
+                except StepRunError as e:
+                    result = ErrorResult(
+                        connection=context.caller_connection, exception=e
+                    )
+                except:
+                    logger.exception(f"unhandled exception while running step: {step}")
+                    raise
             context.caller_connection.result = result  # type: ignore[union-attr]
 
     def run(

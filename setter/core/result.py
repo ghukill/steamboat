@@ -5,9 +5,12 @@ import os
 from abc import abstractmethod
 from collections.abc import Generator
 from os import PathLike
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, Optional, TypeVar
 
 from attr import attrs
+
+if TYPE_CHECKING:
+    from setter.core.step import StepConnection
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -34,6 +37,22 @@ class NoneResult(StepResult):
     """StepResult indicating nothing exists or was returned from Step."""
 
     data: None = None
+
+
+@attrs(auto_attribs=True)
+class SkipResult(StepResult):
+    """StepResult the Step was intentionally skipped before completing."""
+
+    connection: Optional["StepConnection"] = None
+    exception: Exception | None = None
+
+
+@attrs(auto_attribs=True)
+class ErrorResult(StepResult):
+    """StepResult indicating an error occurred during run."""
+
+    connection: Optional["StepConnection"] = None
+    exception: Exception | None = None
 
 
 @attrs(auto_attribs=True)

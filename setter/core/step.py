@@ -24,7 +24,6 @@ class Step(ABC, Generic[Input_StepResult, Output_StepResult]):
         name: str | None = None,
     ) -> None:
         self.name = name or self.__class__.__name__
-        self.result: StepResult | None = None
         self.caller_result: dict[Step, StepResult] | None = defaultdict(NoneResult)
 
     def __repr__(self) -> str:
