@@ -240,12 +240,16 @@ class Runner:
         for layer in self.parallel_topographic_step_sort():
             logger.info(f"Running steps in parallel from layer: {layer}")
             with ThreadPoolExecutor() as executor:
+                # submit all steps from this layer to run in parallel
                 future_step_runs = {
                     executor.submit(self.run_step, step): step for step in layer
                 }
+
+                # as they complete, they are yielded unblocking this loop for that step
                 for future in as_completed(future_step_runs):
                     step = future_step_runs[future]
                     try:
+                        # retrieve the result
                         future.result()
                     # ruff: noqa: E722
                     except:
