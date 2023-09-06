@@ -4,7 +4,7 @@ Steamboat is a library for orchestrating data pipeline tasks, oriented around a 
 
 ## Why "Steamboat"?
 
-Navigating branching rivers (see `DAG`), comprised of stacked decks (see `parallelization`), locomotion derived from steam "feeding" propellers or paddlewheels (see `feeders`) by steam, all motivated by the calling (see `callers`) intrigue of the next river's bend.
+Navigating branching and merging rivers (see `DAG`), comprised of stacked decks chalk full of fun and adventure (see `parallelization`), locomotion derived from steam "feeding" propellers or paddlewheels (see `feeders`), all motivated by the calling (see `callers`) intrigue of the next river's bend.
 
 And, sometimes, slow and steady wins the race.
 
