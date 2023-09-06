@@ -1,12 +1,12 @@
-"""setter.extras.xml_extras"""
+"""steamboat.extras.xml_extras"""
 
 import logging
 from collections.abc import Generator
 
 from attr import attrs
 
-from setter.core.result import GeneratorResult, LocalFileResult
-from setter.core.step import Step, StepContext
+from steamboat.core.result import GeneratorResult, LocalFileResult
+from steamboat.core.step import Step, StepContext
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -19,7 +19,7 @@ try:
 
     dependencies_met = True
 except ImportError:
-    msg = "dependencies not met for 'xml_extras', install with setter[xml]"
+    msg = "dependencies not met for 'xml_extras', install with steamboat[xml]"
     logger.warning(msg)
 
 if dependencies_met:

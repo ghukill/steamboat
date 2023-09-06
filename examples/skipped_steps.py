@@ -1,7 +1,7 @@
-from setter.core.exceptions import *
-from setter.core.result import *
-from setter.core.runner import *
-from setter.core.step import *
+from steamboat.core.exceptions import *
+from steamboat.core.result import *
+from steamboat.core.runner import *
+from steamboat.core.step import *
 
 
 class Good(Step[NoneResult, NumericResult]):

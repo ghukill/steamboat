@@ -7,7 +7,12 @@ from typing import Generic, Optional, get_args, get_origin, get_type_hints
 
 from attr import attrib, attrs
 
-from setter.core.result import Input_StepResult, NoneResult, Output_StepResult, StepResult
+from steamboat.core.result import (
+    Input_StepResult,
+    NoneResult,
+    Output_StepResult,
+    StepResult,
+)
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -16,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class Step(ABC, Generic[Input_StepResult, Output_StepResult]):
-    """Unit of work in a Setter DAG."""
+    """Unit of work in a Steamboat DAG."""
 
     # ruff: noqa: ARG002
     def __init__(
@@ -73,7 +78,7 @@ class Step(ABC, Generic[Input_StepResult, Output_StepResult]):
         return None
 
     def _prepare_step_simulation_context(self, caller_args: dict) -> "StepContext":
-        from setter.core.runner import _RootStep, _TerminalStep
+        from steamboat.core.runner import _RootStep, _TerminalStep
 
         root_step, terminal_step = _RootStep(), _TerminalStep()
         context = StepContext(

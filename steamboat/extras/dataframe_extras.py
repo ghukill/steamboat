@@ -1,11 +1,11 @@
-"""setter.extras.dataframe_extras"""
+"""steamboat.extras.dataframe_extras"""
 # ruff: noqa: S608
 
 import logging
 
 from attr import attrs
 
-from setter.core.result import LocalFileResult, StepResult
+from steamboat.core.result import LocalFileResult, StepResult
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -19,7 +19,7 @@ try:
 
     dependencies_met = True
 except ImportError:
-    msg = "dependencies not met for 'dataframe_extras', install with setter[dataframe]"
+    msg = "dependencies not met for 'dataframe_extras', install with steamboat[dataframe]"
     logger.warning(msg)
 
 if dependencies_met:

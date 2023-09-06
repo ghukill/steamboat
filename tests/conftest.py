@@ -6,9 +6,9 @@ import os
 
 import pytest
 
-from setter.core.result import NoneResult, NumericResult, StringResult
-from setter.core.runner import Runner
-from setter.core.step import Step, StepConnection, StepContext
+from steamboat.core.result import NoneResult, NumericResult, StringResult
+from steamboat.core.runner import Runner
+from steamboat.core.step import Step, StepConnection, StepContext
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def _check_xml_extras_tests(config, items):
-    from setter.extras.xml_extras import dependencies_met
+    from steamboat.extras.xml_extras import dependencies_met
 
     for item in items:
         if item.get_closest_marker("xml_extras") and not dependencies_met:
@@ -27,7 +27,7 @@ def _check_xml_extras_tests(config, items):
 
 
 def _check_dataframe_extras_tests(config, items):
-    from setter.extras.dataframe_extras import dependencies_met
+    from steamboat.extras.dataframe_extras import dependencies_met
 
     for item in items:
         if item.get_closest_marker("dataframe_extras") and not dependencies_met:

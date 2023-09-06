@@ -10,10 +10,10 @@ from typing import Any
 
 import networkx as nx
 
-from setter.core.exceptions import StepRunError, StepRunSkip
-from setter.core.result import ErrorResult, NoneResult, SkipResult, StepResult
-from setter.core.step import Step, StepConnection, StepContext
-from setter.utils.dagascii import draw as draw_graph
+from steamboat.core.exceptions import StepRunError, StepRunSkip
+from steamboat.core.result import ErrorResult, NoneResult, SkipResult, StepResult
+from steamboat.core.step import Step, StepConnection, StepContext
+from steamboat.utils.dagascii import draw as draw_graph
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"

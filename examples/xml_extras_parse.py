@@ -2,10 +2,10 @@ import logging
 
 from lxml import etree
 
-from setter.extras.xml_extras import XMLLocalFileResult, RepeatingXMLElementsGenerator
-from setter.core.step import Step, StepConnection, StepContext
-from setter.core.result import NoneResult
-from setter.core.runner import Runner
+from steamboat.extras.xml_extras import XMLLocalFileResult, RepeatingXMLElementsGenerator
+from steamboat.core.step import Step, StepConnection, StepContext
+from steamboat.core.result import NoneResult
+from steamboat.core.runner import Runner
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"

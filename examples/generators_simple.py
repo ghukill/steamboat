@@ -1,6 +1,6 @@
-from setter.core.result import *
-from setter.core.runner import *
-from setter.core.step import *
+from steamboat.core.result import *
+from steamboat.core.runner import *
+from steamboat.core.step import *
 
 
 class NumberGenerator(Step[NoneResult, GeneratorResult]):

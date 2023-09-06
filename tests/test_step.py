@@ -1,7 +1,7 @@
 """tests.test_step"""
 
-from setter.core.result import StringResult
-from setter.core.step import StepConnection
+from steamboat.core.result import StringResult
+from steamboat.core.step import StepConnection
 
 
 def test_generate_text_step(step_context_empty, generate_text_step):

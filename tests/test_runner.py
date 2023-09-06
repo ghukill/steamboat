@@ -1,9 +1,9 @@
 import logging
 import time
 
-from setter.core.result import NoneResult, NumericResult
-from setter.core.runner import Runner
-from setter.core.step import Step, StepConnection, StepContext
+from steamboat.core.result import NoneResult, NumericResult
+from steamboat.core.runner import Runner
+from steamboat.core.step import Step, StepConnection, StepContext
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"

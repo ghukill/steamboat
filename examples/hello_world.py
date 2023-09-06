@@ -1,5 +1,5 @@
-from setter.core.result import NoneResult
-from setter.core.step import Step, StepContext
+from steamboat.core.result import NoneResult
+from steamboat.core.step import Step, StepContext
 
 
 class PrintHelloWorld(Step[NoneResult, NoneResult]):

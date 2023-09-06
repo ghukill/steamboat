@@ -11,7 +11,7 @@ module = "smart_open.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "setter.*"
+module = "steamboat.*"
 disallow_untyped_calls = false
 
 
@@ -19,7 +19,7 @@ disallow_untyped_calls = false
 select = ["ALL", "PT"]
 target-version = "py311"
 exclude = [
-    "setter/utils/dagascii.py",
+    "steamboat/utils/dagascii.py",
     "scratch.py",
     "tests/**/*",
     "examples/*",
@@ -88,7 +88,7 @@ convention = "google"
 
 [tool.coverage.run]
 omit = [
-    "setter/utils/dagascii.py"
+    "steamboat/utils/dagascii.py"
 ]
 
 [tool.pytest.ini_options]

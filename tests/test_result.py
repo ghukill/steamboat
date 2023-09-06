@@ -3,7 +3,7 @@ import pickle
 
 import pytest
 
-from setter.core.result import (
+from steamboat.core.result import (
     JSONLocalFileResult,
     LocalFileResult,
     NoneResult,
@@ -61,7 +61,7 @@ def test_json_local_file_result():
 
 @pytest.mark.dataframe_extras()
 def test_csv_local_file_result():
-    from setter.extras.dataframe_extras import CSVLocalFileResult
+    from steamboat.extras.dataframe_extras import CSVLocalFileResult
 
     # CSV
     result = CSVLocalFileResult(filepath="tests/fixtures/test.csv", delimiter=",")
@@ -76,7 +76,7 @@ def test_csv_local_file_result():
 
 @pytest.mark.dataframe_extras()
 def test_df_to_duckdb_to_df():
-    from setter.extras.dataframe_extras import DataFrameResult, DuckDbTableResult
+    from steamboat.extras.dataframe_extras import DataFrameResult, DuckDbTableResult
 
     with open("tests/fixtures/test-df.pickle", "rb") as f:
         df = pickle.load(f)
@@ -91,7 +91,7 @@ def test_df_to_duckdb_to_df():
 
 @pytest.mark.xml_extras()
 def test_xml_local_file_namespace_parser():
-    from setter.extras.xml_extras import XMLLocalFileResult
+    from steamboat.extras.xml_extras import XMLLocalFileResult
 
     r1 = XMLLocalFileResult(filepath="tests/fixtures/xml_no_ns.xml")
     assert r1.get_nsmap() == {}

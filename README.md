@@ -1,9 +1,7 @@
-# setter
+# Steamboat
 
-## TODO
-  * Add `SkipStepResult` and surrounding logic
-    * when received by calling Steps, they immediately skip themselves, and so forth
-  * Create helpers to have instances of setter `Runner` as both a return and step type
+## TODO  
+  * Create helpers to have instances of Steamboat `Runner` as both a return and step type
     * could pre-package DAGs and use _them_ as steps in another DAG
   * Add explicit types and behavior for combining steps
     * e.g. `context` will not have `.result` but only `.result_list` (or generator?)

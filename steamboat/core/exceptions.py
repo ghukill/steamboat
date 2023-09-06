@@ -1,4 +1,4 @@
-"""setter.core.exceptions"""
+"""steamboat.core.exceptions"""
 
 
 # ruff: noqa: N818

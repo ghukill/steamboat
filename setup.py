@@ -1,12 +1,12 @@
 from setuptools import find_packages, setup  # type: ignore[import]
 
 setup(
-    name="setter",
+    name="steamboat",
     version="0.1.0",
-    description="TODO",
+    description="DAG oriented data pipeline task orchestrator",
     author="Graham Hukill",
     author_email="ghukill@gmail.com",
-    url="https://github.com/ghukill/setter",
+    url="https://github.com/ghukill/steamboat",
     packages=find_packages(),
     install_requires=[],
     extras_require={

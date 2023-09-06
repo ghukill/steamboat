@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Optional, TypeVar
 from attr import attrs
 
 if TYPE_CHECKING:
-    from setter.core.step import StepConnection
+    from steamboat.core.step import StepConnection
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
