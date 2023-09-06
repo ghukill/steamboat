@@ -1,6 +1,7 @@
 # Steamboat
 
 ## TODO  
+  * Testing coverage now that architecture has settled down a bit
   * Create helpers to have instances of Steamboat `Runner` as both a return and step type
     * could pre-package DAGs and use _them_ as steps in another DAG
   * Add explicit types and behavior for combining steps
