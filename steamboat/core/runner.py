@@ -13,7 +13,6 @@ import networkx as nx
 from steamboat.core.exceptions import StepRunError, StepRunSkip
 from steamboat.core.result import ErrorResult, NoneResult, SkipResult, StepResult
 from steamboat.core.step import Step, StepConnection, StepContext
-from steamboat.utils.dagascii import draw as draw_graph
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -102,12 +101,7 @@ class Runner:
         return levels
 
     def graph_to_ascii(self) -> str:
-        return draw_graph(list(self.dag.nodes), list(self.dag.edges))
-
-    def log_as_ascii(self) -> None:
-        if len(self.dag.nodes) == 0:
-            return
-        logger.debug(f"\n{self.graph_to_ascii()}")
+        raise NotImplemented()
 
     def finalize_dag(self) -> None:
         """
@@ -222,8 +216,6 @@ class Runner:
 
         self.finalize_dag()
 
-        self.log_as_ascii()
-
         for step in self.topographic_step_sort():
             if step in exclude_steps:
                 logger.warning(f"excluding step: {step}")
@@ -248,8 +240,6 @@ class Runner:
         t0 = time.time()
 
         self.finalize_dag()
-
-        self.log_as_ascii()
 
         for layer in self.parallel_topographic_step_sort():
             logger.info(f"Running steps in parallel from layer: {layer}")

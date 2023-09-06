@@ -1,5 +1,48 @@
 # Steamboat
 
+Steamboat is a library for orchestrating data pipeline tasks, oriented around a directed acyclic graph (DAG).
+
+## Why "Steamboat"?
+
+Navigating branching rivers (see `DAG`), comprised of stacked decks (see `parallelization`), locomotion derived from steam "feeding" propellers or paddlewheels (see `feeders`) by steam, all motivated by the calling (see `callers`) intrigue of the next river's bend.
+
+And, sometimes, slow and steady wins the race.
+
+## Installation
+
+Base installation:
+```shell
+pip install steamboat
+```
+
+Installation with XML extras:
+```shell
+pip install "steamboat[xml]"
+```
+
+Installation with DataFrame extras:
+```shell
+pip install "steamboat[dataframe]"
+```
+
+## Development
+
+Installation (creates Python 3.11 virtual environment and installs dev dependencies):
+```shell
+pipenv install --dev
+```
+
+Lint:
+```shell
+make lint
+```
+
+Tests:
+```shell
+make test
+make test-verbose # chatty
+```
+
 ## TODO  
   * Testing coverage now that architecture has settled down a bit
   * Create helpers to have instances of Steamboat `Runner` as both a return and step type
