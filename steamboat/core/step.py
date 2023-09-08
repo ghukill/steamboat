@@ -28,8 +28,12 @@ class Step(ABC, Generic[Input_StepResult, Output_StepResult]):
         self,
         name: str | None = None,
     ) -> None:
-        self.name = name or self.__class__.__name__
-        self.caller_result: dict[Step, StepResult] | None = defaultdict(NoneResult)
+        self._name = name or self.__class__.__name__
+
+    @property
+    def name(self):
+        name = getattr(self, "_name") or self.__class__.__name__
+        return name
 
     def __repr__(self) -> str:
         # ruff: noqa: D105
