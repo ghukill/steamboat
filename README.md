@@ -51,8 +51,7 @@ make test-verbose # chatty
     * e.g. `context` will not have `.result` but only `.result_list` (or generator?)
     * then, a "normal" step (need a name) will have only `.result`
     * exceptions will be appropriately returned, if those properties are accessed, as we'll know the type of the active Step
-  * Remove the ASCII graph
-    * clunky with lots of nodes
+  * Allow passing optional, more granular type to `StepResult` types, by using generics
 
 ## Wishlist
 
