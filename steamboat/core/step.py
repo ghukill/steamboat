@@ -31,7 +31,7 @@ class Step(ABC, Generic[Input_StepResult, Output_StepResult]):
         self._name = name or self.__class__.__name__
 
     @property
-    def name(self):
+    def name(self) -> str:
         name = getattr(self, "_name", None) or self.__class__.__name__
         return name
 

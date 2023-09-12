@@ -5,7 +5,7 @@ from collections.abc import Generator
 
 from attr import attrs
 
-from steamboat.core.result import GeneratorResult, LocalFileResult
+from steamboat.core.result import GeneratorResult, LocalFileResult, StepResult
 from steamboat.core.step import Step, StepContext
 
 logging.basicConfig(
@@ -25,21 +25,25 @@ except ImportError:
 if dependencies_met:
 
     @attrs(auto_attribs=True)
-    class XMLLocalFileResult(LocalFileResult):
+    class XMLResult(StepResult):
+        data: str | bytes
         _tree: etree._ElementTree | None = None
-
-        def read_file(self, read_mode: str = "rb") -> bytes | str:
-            with open(self.filepath, read_mode) as f:
-                return f.read()
 
         def get_tree(self) -> etree._ElementTree:
             if self._tree is None:
-                self._tree = etree.parse(self.filepath)
+                self._tree = etree.fromstring(self.data).getroottree()
             return self._tree
 
         def get_root(self) -> etree._Element:
             tree = self.get_tree()
             return tree.getroot()
+
+    @attrs(auto_attribs=True)
+    class XMLLocalFileResult(LocalFileResult, XMLResult):
+        def get_tree(self) -> etree._ElementTree:
+            if self._tree is None:
+                self._tree = etree.parse(self.filepath)
+            return self._tree
 
         def get_nsmap(self) -> dict:
             def gather_all_namespaces(
@@ -68,6 +72,8 @@ if dependencies_met:
             return nsmap
 
     class RepeatingXMLElementsGenerator(Step[XMLLocalFileResult, GeneratorResult]):
+        """Step to return a Generator of a repeating element."""
+
         def __init__(
             self,
             xpath: str | None = None,

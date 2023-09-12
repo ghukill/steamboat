@@ -4,7 +4,7 @@ line-length = 90
 [tool.mypy]
 disallow_untyped_calls = true
 disallow_untyped_defs = true
-exclude = "(tests\\/\\.*)|(scratch\\.py)|(examples\\/\\.*)"
+exclude = "(tests\\/\\.*)|(scratch\\.py)|(examples\\/\\.*)|(build\\/\\.*)"
 
 [[tool.mypy.overrides]]
 module = "smart_open.*"
@@ -23,6 +23,7 @@ exclude = [
     "scratch.py",
     "tests/**/*",
     "examples/*",
+    "build/**/*",
 ]
 
 ignore = [
