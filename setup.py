@@ -2,7 +2,7 @@ from setuptools import find_packages, setup  # type: ignore[import]
 
 setup(
     name="steamboat",
-    version="0.1.3",
+    version="0.1.4",
     description="DAG oriented data pipeline task orchestrator",
     author="Graham Hukill",
     author_email="ghukill@gmail.com",
