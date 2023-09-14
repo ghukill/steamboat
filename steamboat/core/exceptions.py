@@ -8,3 +8,7 @@ class StepRunSkip(Exception):
 
 class StepRunError(Exception):
     """Exception to raise when a Step wants to bubble up an error."""
+
+
+class MultipleFeederStepError(Exception):
+    """Raised when trying to access a singular result for a step with multiple feeders."""

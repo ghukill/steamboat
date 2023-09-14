@@ -101,7 +101,7 @@ class Runner:
         return levels
 
     def graph_to_ascii(self) -> str:
-        raise NotImplemented()  # type: ignore[misc]
+        raise NotImplementedError  # type: ignore[misc]
 
     def finalize_dag(self) -> None:
         """
