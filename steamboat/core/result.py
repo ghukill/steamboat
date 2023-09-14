@@ -5,7 +5,7 @@ import os
 from abc import abstractmethod
 from collections.abc import Generator
 from os import PathLike
-from typing import TYPE_CHECKING, Any, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Optional, TypeVar, Generic
 
 from attr import attrs
 
@@ -71,8 +71,8 @@ class ListResult(StepResult):
 
 
 @attrs(auto_attribs=True)
-class GeneratorResult(StepResult):
-    data: Generator
+class GeneratorResult(StepResult, Generic[Output_StepResult]):
+    data: Generator[Output_StepResult]
 
 
 @attrs(auto_attribs=True)
