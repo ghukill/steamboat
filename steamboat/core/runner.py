@@ -188,18 +188,24 @@ class Runner:
     def run_step(self, step: Step) -> None:
         for caller in self.get_callers(step):
             context = self.prepare_step_context(step, caller)
-            if isinstance(context.results, ErrorResult | SkipResult):
+            if any(
+                isinstance(result, ErrorResult | SkipResult) for result in context.results
+            ):
                 result = context.results
             else:
                 logger.info(f"running Step: {step} with context: {context}")
                 try:
                     result = step.run(context)
                 except StepRunSkip as e:
-                    result = SkipResult(connection=context.caller_connection, exception=e)
+                    result = SkipResult(
+                        connection=context.caller_connection,
+                        exception=e,
+                    )  # type: ignore[assignment]
                 except StepRunError as e:
                     result = ErrorResult(
-                        connection=context.caller_connection, exception=e
-                    )
+                        connection=context.caller_connection,
+                        exception=e,
+                    )  # type: ignore[assignment]
                 except:
                     logger.exception(f"unhandled exception while running step: {step}")
                     raise

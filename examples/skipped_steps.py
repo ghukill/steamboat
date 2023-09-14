@@ -11,7 +11,7 @@ class Good(Step[NoneResult, NumericResult]):
 
 class WantsBigNumbers(Step[NumericResult, NumericResult]):
     def run(self, context: StepContext) -> NumericResult:
-        num = context.results.data
+        num = context.result.data
         if num < 1_000_000:
             raise StepRunSkip(f"input number {num} too small")
         else:
@@ -20,7 +20,7 @@ class WantsBigNumbers(Step[NumericResult, NumericResult]):
 
 class NotGonnaGetIt(Step[NumericResult, NumericResult]):
     def run(self, context: StepContext) -> NumericResult:
-        return NumericResult(data=context.results.data + 100)
+        return NumericResult(data=context.result.data + 100)
 
 
 g, w, n = Good(), WantsBigNumbers(), NotGonnaGetIt()

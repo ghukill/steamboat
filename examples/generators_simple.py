@@ -29,7 +29,7 @@ class FruitPickerInstructions(Step[NoneResult, GeneratorResult]):
         ]
 
         def func():
-            for i in context.results.data:
+            for i in context.result.data:
                 fruit_pick_instruction = f"{i} {fruits[i]}s"
                 print(
                     f"[Step FruitPickerInstructions] - fruit pick instruction: {fruit_pick_instruction}"
@@ -42,7 +42,7 @@ class FruitPickerInstructions(Step[NoneResult, GeneratorResult]):
 class FruitPicker(Step[GeneratorResult, NumericResult]):
     def run(self, context: StepContext) -> ListResult:
         instructions = []
-        for instruction in context.results.data:
+        for instruction in context.result.data:
             print(f"[Step FruitPicker] - picking per instruction: {instruction}\n")
             instructions.append(instruction)
         return ListResult(data=instructions)

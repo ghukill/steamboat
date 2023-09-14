@@ -23,8 +23,8 @@ class Printer(Step):
         logging.info("PRINTER OUTPUT #############################################")
         for i, record in enumerate(context.result.data):
             logging.info(f"record: {i}")
-            logging.info(f"element: {etree.tostring(record).strip()}")
-            logging.info(f"text: {record.text}")
+            logging.info(f"element: {etree.tostring(record.get_root()).strip()}")
+            logging.info(f"text: {record.get_root().text}")
         logging.info("############################################################")
         return NoneResult()
 
