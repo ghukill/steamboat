@@ -2,17 +2,19 @@
 
 import logging
 from abc import ABC, abstractmethod
-from collections import defaultdict
-from typing import Generic, Optional, get_args, get_origin, get_type_hints
+from typing import Generic, Optional, TypeVar, get_args, get_origin, get_type_hints
 
 from attr import attrib, attrs
 
+from steamboat.core.exceptions import MultipleFeederStepError
 from steamboat.core.result import (
     Input_StepResult,
     NoneResult,
     Output_StepResult,
     StepResult,
 )
+
+StepContextResultType = TypeVar("StepContextResultType", bound=StepResult)
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -31,7 +33,7 @@ class Step(ABC, Generic[Input_StepResult, Output_StepResult]):
         self._name = name or self.__class__.__name__
 
     @property
-    def name(self):
+    def name(self) -> str:
         name = getattr(self, "_name", None) or self.__class__.__name__
         return name
 
@@ -85,7 +87,7 @@ class Step(ABC, Generic[Input_StepResult, Output_StepResult]):
         from steamboat.core.runner import _RootStep, _TerminalStep
 
         root_step, terminal_step = _RootStep(), _TerminalStep()
-        context = StepContext(
+        context: StepContext[NoneResult] = StepContext(
             caller_connection=StepConnection(
                 step=self, caller=terminal_step, args=caller_args
             ),
@@ -104,8 +106,11 @@ class Step(ABC, Generic[Input_StepResult, Output_StepResult]):
         return self.run(context)
 
 
-class StepContext:
-    """Context in which the Step is invoked."""
+class StepContext(Generic[StepContextResultType]):
+    """Context in which the Step is invoked.
+
+    The context will have a SINGLE calling Step, but may have MULTIPLE feeder Steps.
+    """
 
     # ruff: noqa: ARG002
     def __init__(
@@ -147,23 +152,32 @@ class StepContext:
         return list(self.feeder_connections.keys())
 
     @property
-    def results(self) -> StepResult | list[StepResult]:
+    def results(self) -> list[StepResult]:
         """Return the results of this Context.
 
         A StepContext always has ONE caller Step, but may have MULTIPLE feeder Steps.
-        For convenience, if only a single feeder Step is present, return that StepResult
-        as a scalar value here.  Otherwise, return a list of StepResults.
+        This property always returns a list, regardless of multiple or a single feeder
+        Step.  If a downstream Step is confident only a single feeder Step is part of the
+        context, it may use StepContext.result (singular) defined below.
         """
-        feeder_results = [
-            connection.result for connection in self.feeder_connections.values()
-        ]
+        return [connection.result for connection in self.feeder_connections.values()]
+
+    @property
+    def result(self) -> StepContextResultType:
+        """Return a single StepResult from context.
+
+        If multiple feeder Steps are present in the context, throw an exception.
+        """
+        feeder_results = self.results
         if len(feeder_results) == 1:
-            return feeder_results[0]
-        return feeder_results
+            return feeder_results[0]  # type: ignore[return-value]
+        raise MultipleFeederStepError(
+            "There are multiple feeder Steps. Use '.results' (plural) instead."
+        )
 
 
 @attrs(auto_attribs=True)
-class StepConnection:
+class StepConnection(Generic[Input_StepResult, Output_StepResult]):
     """Directional connection between Step and "caller" Step.
 
     Example: X --> Y
@@ -178,7 +192,7 @@ class StepConnection:
     step: Step
     caller: Step
     args: dict = attrib(factory=dict)
-    result: StepResult = attrib(factory=NoneResult)
+    result: Output_StepResult | NoneResult = attrib(factory=NoneResult)
 
     def validate(self) -> bool:
         """Validate a StepConnection

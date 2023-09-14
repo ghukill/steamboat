@@ -67,7 +67,7 @@ def generate_text_step():
 def reverse_text_step():
     class ReverseText(Step[StringResult, StringResult]):
         def run(self, context: StepContext) -> StringResult:
-            return StringResult(data=context.results.data[::-1])
+            return StringResult(data=context.result.data[::-1])
 
     return ReverseText
 
@@ -103,14 +103,14 @@ def combine_and_split_dag_runner():
 
     class EvaluateNumber(Step[NumericResult, NumericResult | NoneResult]):
         def run(self, context) -> NumericResult | NoneResult:
-            if context.caller_connection.args["checker"](context.results.data):
+            if context.caller_connection.args["checker"](context.result.data):
                 return NumericResult(data=84)
             else:
                 return NoneResult()
 
     class NumberPrinter(Step[NumericResult | NoneResult, NoneResult]):
-        def run(self, context) -> NoneResult | NoneResult:
-            res = context.results
+        def run(self, context) -> NumericResult | NoneResult:
+            res = context.result
             if isinstance(res, NumericResult):
                 logging.info(f"We got a number! {res.data}")
             else:

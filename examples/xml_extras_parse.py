@@ -21,7 +21,7 @@ class ProvideTestXMLFile(Step):
 class Printer(Step):
     def run(self, context: StepContext) -> NoneResult:
         logging.info("PRINTER OUTPUT #############################################")
-        for i, record in enumerate(context.results.data):
+        for i, record in enumerate(context.result.data):
             logging.info(f"record: {i}")
             logging.info(f"element: {etree.tostring(record).strip()}")
             logging.info(f"text: {record.text}")
